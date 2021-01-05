@@ -2,6 +2,8 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:submission_flutter/model/tourism_place.dart';
 import 'package:submission_flutter/screen/detail_image_screen.dart';
 import 'package:submission_flutter/utils/helper.dart';
@@ -176,35 +178,95 @@ class DetailScreen extends StatelessWidget {
             Container(
               height: 150,
               padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: place.imageUrls.map((url) {
-                  return OpenContainer(
-                    transitionDuration: Duration(milliseconds: 500),
-                    openElevation: 0,
-                    closedElevation: 0,
-                    closedBuilder: (context, action) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(url),
-                        ),
-                      );
-                    },
-                    openBuilder: (context, action) {
-                      return DetailImageScreen(
-                        imageUrl: url,
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
+              child: ListView(scrollDirection: Axis.horizontal, children: [
+                ...place.imageUrls
+                    .asMap()
+                    .map((index, url) => MapEntry(
+                        index,
+                        GestureDetector(
+                          onTap: () {
+                            modalBottomimages(context, index, place.imageUrls);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(url),
+                            ),
+                          ),
+                        )))
+                    .values
+                    .toList()
+              ]),
             ),
           ],
         ),
       ),
     );
+  }
+
+  modalBottomimages(BuildContext context, int number, List<String> imageUrl) {
+    PageController pageController = PageController(initialPage: number);
+
+    showModalBottomSheet(
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        enableDrag: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        context: context,
+        builder: (BuildContext cn) {
+          return Container(
+            // margin: EdgeInsets.only(top: 24),
+            decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10))),
+            child: Scaffold(
+                backgroundColor: Colors.black,
+                body: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: PhotoViewGallery.builder(
+                        pageController: pageController,
+                        itemCount: imageUrl.length,
+                        loadingBuilder: (context, event) => Center(
+                          child: Container(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        builder: (context, index) {
+                          return PhotoViewGalleryPageOptions(
+                            imageProvider: NetworkImage(imageUrl[index]),
+                            initialScale: PhotoViewComputedScale.contained * 1,
+                            heroAttributes:
+                                PhotoViewHeroAttributes(tag: imageUrl[index]),
+                          );
+                        },
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding:
+                                EdgeInsets.only(left: 16, right: 16, top: 40),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
+                          )),
+                    ),
+                  ],
+                )),
+          );
+        });
   }
 }
 

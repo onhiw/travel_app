@@ -12,10 +12,79 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   TabController tabController;
 
+  final List<Tab> appBarTabs = [
+    Tab(
+      text: "All",
+      icon: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40), color: Colors.blue[400]),
+        child: Center(
+          child: Icon(
+            Icons.widgets,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+    Tab(
+      text: "Hill",
+      icon: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40), color: Colors.green[400]),
+        child: Center(
+          child: Icon(
+            Icons.filter_hdr,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+    Tab(
+      text: "Beach",
+      icon: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40), color: Colors.orange[400]),
+        child: Center(
+          child: Icon(
+            Icons.beach_access,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+    Tab(
+      text: "Hotel",
+      icon: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40), color: Colors.cyan[400]),
+        child: Center(
+          child: Icon(
+            Icons.hotel,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -26,94 +95,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         elevation: 0,
         backgroundColor: Colors.white,
         title: Text(
-          'Discovery',
-          style: TextStyle(color: Colors.black),
+          'Discover',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        bottom: TabBar(
+          labelColor: Colors.black,
+          controller: tabController,
+          tabs: appBarTabs,
+          isScrollable: false,
         ),
       ),
-      body: Column(
-        children: [
-          TabBar(
-            indicatorColor: Colors.blue,
-            labelColor: Colors.black,
-            tabs: [
-              Tab(
-                text: "All",
-                icon: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      color: Colors.blue[400]),
-                  child: Center(
-                    child: Icon(
-                      Icons.widgets,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              Tab(
-                text: "Hill",
-                icon: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      color: Colors.green[400]),
-                  child: Center(
-                    child: Icon(
-                      Icons.filter_hdr,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              Tab(
-                text: "Beach",
-                icon: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      color: Colors.orange[400]),
-                  child: Center(
-                    child: Icon(
-                      Icons.beach_access,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              Tab(
-                text: "Hotel",
-                icon: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      color: Colors.cyan[400]),
-                  child: Center(
-                    child: Icon(
-                      Icons.hotel,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            controller: tabController,
-          ),
-          Expanded(
-            flex: 40,
-            child: TabBarView(controller: tabController, children: <Widget>[
-              _listData(context, 'all'),
-              _listData(context, 'hill'),
-              _listData(context, 'beach'),
-              _listData(context, 'hotel')
-            ]),
-          ),
-        ],
-      ),
+      body: TabBarView(controller: tabController, children: <Widget>[
+        _listData(context, 'all'),
+        _listData(context, 'hill'),
+        _listData(context, 'beach'),
+        _listData(context, 'hotel')
+      ]),
     );
   }
 
