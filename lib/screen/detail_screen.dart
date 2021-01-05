@@ -1,19 +1,88 @@
+import 'dart:io';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:like_button/like_button.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:submission_flutter/constant/color_pallete.dart';
 import 'package:submission_flutter/model/tourism_place.dart';
 import 'package:submission_flutter/screen/detail_image_screen.dart';
+import 'package:submission_flutter/utils/dbhelper.dart';
 import 'package:submission_flutter/utils/helper.dart';
 
 var informationTextStyle = TextStyle(color: Colors.black);
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
   final TourismPlace place;
 
   DetailScreen({@required this.place});
+
+  @override
+  _DetailScreenState createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+  TourismPlace favoriteState;
+
+  @override
+  void initState() {
+    super.initState();
+    DbHelper db = DbHelper();
+    favoriteState = widget.place;
+    db.getFavorite(favoriteState.id).then((product) {
+      print(product);
+      if (product == null) {
+        setState(() {
+          favoriteState.favored = false;
+        });
+      } else {
+        setState(() {
+          favoriteState.favored = product.favored;
+        });
+      }
+    });
+  }
+
+  void onPressed() {
+    DbHelper db = DbHelper();
+    setState(() => favoriteState.favored = !favoriteState.favored);
+
+    if (favoriteState.favored == true) {
+      db.addFavorite(favoriteState);
+      Fluttertoast.showToast(
+          msg: "Berhasil ditambahkan ke daftar favorite anda",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green[400],
+          fontSize: 12,
+          textColor: Colors.white);
+    } else {
+      db.deleteFavorite(favoriteState.id);
+      Fluttertoast.showToast(
+          msg: "Berhasil dihapus dari daftar favorite anda",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.redAccent[400],
+          fontSize: 12,
+          textColor: Colors.white);
+    }
+  }
+
+  Future<bool> onLikeButtonTapped(bool isLiked) async {
+    if (!isLiked) {
+      onPressed();
+    } else {
+      onPressed();
+    }
+
+    return !isLiked;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +99,11 @@ class DetailScreen extends StatelessWidget {
                   openElevation: 0,
                   closedElevation: 0,
                   closedBuilder: (context, action) {
-                    return Image.network(place.imageAsset);
+                    return Image.network(widget.place.imageAsset);
                   },
                   openBuilder: (context, action) {
                     return DetailImageScreen(
-                      imageUrl: place.imageAsset,
+                      imageUrl: widget.place.imageAsset,
                     );
                   },
                 ),
@@ -42,16 +111,61 @@ class DetailScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
+                      GestureDetector(
+                        onTap: () {
                           Navigator.pop(context);
                         },
+                        child: Container(
+                            margin: EdgeInsets.all(8),
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: Colors.black54),
+                            child: Center(
+                                child: Platform.isIOS
+                                    ? Container(
+                                        margin: EdgeInsets.only(left: 8),
+                                        child: Icon(
+                                          Icons.arrow_back_ios,
+                                          color: Colors.white,
+                                        ))
+                                    : Icon(
+                                        Icons.arrow_back,
+                                        color: Colors.white,
+                                      ))),
                       ),
-                      // FavoriteButton(),
+                      Container(
+                        margin: EdgeInsets.all(8),
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width / 120),
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: Colors.black54),
+                        child: LikeButton(
+                          size: 30,
+                          circleColor: CircleColor(
+                              start: Color(0xff00ddff), end: Color(0xff0099cc)),
+                          bubblesColor: BubblesColor(
+                            dotPrimaryColor: Color(0xff33b5e5),
+                            dotSecondaryColor: Color(0xff0099cc),
+                          ),
+                          isLiked: favoriteState.favored,
+                          likeBuilder: (bool isLiked) {
+                            return favoriteState.favored
+                                ? Icon(
+                                    Icons.favorite,
+                                    color: Colors.redAccent[400],
+                                  )
+                                : Icon(Icons.favorite, color: Colors.white);
+                          },
+                          onTap: (isLiked) {
+                            return onLikeButtonTapped(isLiked);
+                          },
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -60,7 +174,7 @@ class DetailScreen extends StatelessWidget {
             Container(
               margin: EdgeInsets.all(16),
               child: Text(
-                place.name,
+                widget.place.name,
                 textAlign: TextAlign.left,
                 style: TextStyle(
                     fontSize: 18,
@@ -73,7 +187,7 @@ class DetailScreen extends StatelessWidget {
               child: Row(
                 children: [
                   RatingBarIndicator(
-                    rating: place.ratingAvg,
+                    rating: double.parse(widget.place.ratingAvg),
                     itemBuilder: (context, index) => Icon(
                       Icons.star,
                       color: Colors.amber,
@@ -84,22 +198,22 @@ class DetailScreen extends StatelessWidget {
                   ),
                   Container(
                     margin: EdgeInsets.only(left: 8, right: 15),
-                    child: Text(place.ratingAvg.toString(),
+                    child: Text(widget.place.ratingAvg,
                         style: TextStyle(
                           fontSize: 12.0,
                           fontWeight: FontWeight.bold,
                         )),
                   ),
-                  place.category == 'hill'
+                  widget.place.category == 'hill'
                       ? Icon(Icons.filter_hdr, color: Colors.green[400])
-                      : place.category == 'beach'
+                      : widget.place.category == 'beach'
                           ? Icon(Icons.beach_access, color: Colors.orange[400])
-                          : place.category == 'hotel'
+                          : widget.place.category == 'hotel'
                               ? Icon(Icons.hotel, color: Colors.cyan[400])
                               : Container(),
                   Container(
                     margin: EdgeInsets.only(left: 10),
-                    child: Text(place.category.toUpperCase(),
+                    child: Text(widget.place.category.toUpperCase(),
                         style: TextStyle(
                           fontSize: 12.0,
                           fontWeight: FontWeight.bold,
@@ -118,7 +232,7 @@ class DetailScreen extends StatelessWidget {
                       Icon(Icons.calendar_today),
                       SizedBox(height: 8.0),
                       Text(
-                        place.openDays,
+                        widget.place.openDays,
                         style: informationTextStyle,
                       ),
                     ],
@@ -128,7 +242,7 @@ class DetailScreen extends StatelessWidget {
                       Icon(Icons.access_time),
                       SizedBox(height: 8.0),
                       Text(
-                        place.openTime,
+                        widget.place.openTime,
                         style: informationTextStyle,
                       ),
                     ],
@@ -139,7 +253,7 @@ class DetailScreen extends StatelessWidget {
                       SizedBox(height: 8.0),
                       Text(
                         FormatHelper.formatCurrency(
-                            double.parse(place.ticketPrice.toString())),
+                            double.parse(widget.place.ticketPrice.toString())),
                         style: informationTextStyle,
                       ),
                     ],
@@ -160,7 +274,7 @@ class DetailScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.only(left: 16, right: 16),
               child: Text(
-                place.description,
+                widget.place.description,
                 textAlign: TextAlign.left,
                 style: informationTextStyle,
               ),
@@ -179,13 +293,15 @@ class DetailScreen extends StatelessWidget {
               height: 150,
               padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: ListView(scrollDirection: Axis.horizontal, children: [
-                ...place.imageUrls
+                ...widget.place.imageUrls
+                    .split(',')
                     .asMap()
                     .map((index, url) => MapEntry(
                         index,
                         GestureDetector(
                           onTap: () {
-                            modalBottomimages(context, index, place.imageUrls);
+                            modalBottomimages(context, index,
+                                widget.place.imageUrls.split(','));
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8),
@@ -205,7 +321,7 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  modalBottomimages(BuildContext context, int number, List<String> imageUrl) {
+  modalBottomimages(BuildContext context, int number, imageUrl) {
     PageController pageController = PageController(initialPage: number);
 
     showModalBottomSheet(
@@ -267,29 +383,5 @@ class DetailScreen extends StatelessWidget {
                 )),
           );
         });
-  }
-}
-
-class FavoriteButton extends StatefulWidget {
-  @override
-  _FavoriteButtonState createState() => _FavoriteButtonState();
-}
-
-class _FavoriteButtonState extends State<FavoriteButton> {
-  bool isFavorite = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        isFavorite ? Icons.favorite : Icons.favorite_border,
-        color: Colors.red,
-      ),
-      onPressed: () {
-        setState(() {
-          isFavorite = !isFavorite;
-        });
-      },
-    );
   }
 }
