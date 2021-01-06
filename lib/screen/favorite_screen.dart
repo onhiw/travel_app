@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:submission_flutter/model/tourism_place.dart';
 import 'package:submission_flutter/screen/detail_screen.dart';
 import 'package:submission_flutter/utils/dbhelper.dart';
@@ -133,9 +134,17 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                             fit: BoxFit.cover,
                                             width: double.infinity,
                                             height: double.infinity,
-                                            placeholder: (context, url) => Center(
-                                                child:
-                                                    CircularProgressIndicator()),
+                                            placeholder: (context, url) =>
+                                                Center(
+                                                    child: Shimmer.fromColors(
+                                              baseColor: Colors.grey[300],
+                                              highlightColor: Colors.grey[100],
+                                              child: Container(
+                                                color: Colors.white,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                              ),
+                                            )),
                                             errorWidget:
                                                 (context, url, error) => Center(
                                                     child: Image.asset(
