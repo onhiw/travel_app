@@ -85,7 +85,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         backgroundColor: Colors.white,
         title: Text("My Favorite",
             style: TextStyle(
-                fontFamily: "Proppins",
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.black)),

@@ -1,19 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
-class DetailImageScreen extends StatefulWidget {
+class DetailImageScreen extends StatelessWidget {
   final String imageUrl;
   DetailImageScreen({this.imageUrl});
-
-  @override
-  _DetailImageScreenState createState() => _DetailImageScreenState();
-}
-
-class _DetailImageScreenState extends State<DetailImageScreen> {
-  String _imageUrl;
   @override
   Widget build(BuildContext context) {
-    _imageUrl = widget.imageUrl;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -30,7 +24,7 @@ class _DetailImageScreenState extends State<DetailImageScreen> {
                 "assets/default_image.png",
                 fit: BoxFit.cover,
               ),
-              imageProvider: NetworkImage(_imageUrl),
+              imageProvider: NetworkImage(imageUrl),
             ),
           ),
           Align(
@@ -42,7 +36,7 @@ class _DetailImageScreenState extends State<DetailImageScreen> {
                 child: Container(
                   padding: EdgeInsets.only(left: 16, right: 16, top: 40),
                   child: Icon(
-                    Icons.arrow_back,
+                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
                     color: Colors.white,
                   ),
                 )),
