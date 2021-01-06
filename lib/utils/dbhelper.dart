@@ -48,6 +48,8 @@ class DbHelper {
           category TEXT,
           ratingAvg TEXT,
           favored REAL,
+          latitude TEXT,
+          longitude TEXT,
           imageUrls TEXT)
           ''');
     print("Database was created");

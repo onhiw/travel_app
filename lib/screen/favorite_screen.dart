@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:submission_flutter/constant/color_pallete.dart';
 import 'package:submission_flutter/model/tourism_place.dart';
 import 'package:submission_flutter/screen/detail_screen.dart';
 import 'package:submission_flutter/utils/dbhelper.dart';
+import 'package:submission_flutter/utils/helper.dart';
 
 class FavoriteScreen extends StatefulWidget {
   @override
@@ -83,33 +83,27 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
         backgroundColor: Colors.white,
-        title: Text("My Favorite",
-            style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black)),
+        title: Container(
+          color: Colors.white,
+          child: TextField(
+            onChanged: (String string) => (subject.add(string)),
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              hintText: "Cari favorite",
+              prefixIcon: Icon(
+                Icons.search,
+                color: Colors.grey,
+              ),
+              border: InputBorder.none,
+              fillColor: Colors.grey[100],
+              filled: true,
+            ),
+          ),
+        ),
       ),
       body: Container(
         child: Column(
           children: <Widget>[
-            Container(
-              color: Colors.white,
-              padding: EdgeInsets.only(left: 24, right: 24, bottom: 5, top: 5),
-              child: TextField(
-                onChanged: (String string) => (subject.add(string)),
-                keyboardType: TextInputType.url,
-                decoration: InputDecoration(
-                  hintText: "Cari favorite",
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey,
-                  ),
-                  border: InputBorder.none,
-                  fillColor: Colors.grey[100],
-                  filled: true,
-                ),
-              ),
-            ),
             filteredProduct.length != 0
                 ? Expanded(
                     child: ListView.separated(
@@ -119,7 +113,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                           // margin: EdgeInsets.only(left: 16, right: 16),
                           child: ListTile(
                             contentPadding: EdgeInsets.only(
-                                left: 16, right: 16, top: 8, bottom: 8),
+                                left: 10, right: 10, top: 8, bottom: 8),
                             title: Container(
                               padding: EdgeInsets.only(left: 8, right: 8),
                               child: Column(
@@ -128,23 +122,52 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                   Container(
                                     width: double.infinity,
                                     height: 200,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(25),
-                                      child: CachedNetworkImage(
-                                        imageUrl:
-                                            filteredProduct[index].imageAsset,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => Center(
-                                            child: CircularProgressIndicator()),
-                                        errorWidget: (context, url, error) =>
-                                            Center(
-                                                child: Image.asset(
-                                          "assets/default_image.png",
-                                          height: double.infinity,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                        )),
-                                      ),
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: CachedNetworkImage(
+                                            imageUrl: filteredProduct[index]
+                                                .imageAsset,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            placeholder: (context, url) => Center(
+                                                child:
+                                                    CircularProgressIndicator()),
+                                            errorWidget:
+                                                (context, url, error) => Center(
+                                                    child: Image.asset(
+                                              "assets/default_image.png",
+                                              height: double.infinity,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                            )),
+                                          ),
+                                        ),
+                                        Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Container(
+                                            height: 35,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.only(
+                                                    bottomRight:
+                                                        Radius.circular(8),
+                                                    topLeft:
+                                                        Radius.circular(8)),
+                                                color: Colors.red[900]),
+                                            child: Text(
+                                              filteredProduct[index].location,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
                                   SizedBox(
@@ -233,8 +256,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                             height: 5,
                                           ),
                                           Text(
-                                            filteredProduct[index].location,
-                                            maxLines: 2,
+                                            FormatHelper.formatCurrency(
+                                                double.parse(
+                                                    filteredProduct[index]
+                                                        .ticketPrice
+                                                        .toString())),
                                             style: TextStyle(
                                               color: Colors.black,
                                             ),

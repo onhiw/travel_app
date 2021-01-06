@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
@@ -5,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:submission_flutter/constant/color_pallete.dart';
 import 'package:submission_flutter/model/tourism_place.dart';
 import 'package:submission_flutter/screen/detail_image_screen.dart';
 import 'package:submission_flutter/utils/dbhelper.dart';
@@ -27,11 +28,15 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   TourismPlace favoriteState;
+  Completer<GoogleMapController> _mapsController = Completer();
+
+  Set<Marker> markers = Set();
 
   @override
   void initState() {
     super.initState();
     DbHelper db = DbHelper();
+
     favoriteState = widget.place;
     db.getFavorite(favoriteState.id).then((product) {
       print(product);
@@ -117,8 +122,8 @@ class _DetailScreenState extends State<DetailScreen> {
                         },
                         child: Container(
                             margin: EdgeInsets.all(8),
-                            height: 50,
-                            width: 50,
+                            height: 45,
+                            width: 45,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
                                 color: Colors.black54),
@@ -139,8 +144,8 @@ class _DetailScreenState extends State<DetailScreen> {
                         margin: EdgeInsets.all(8),
                         padding: EdgeInsets.only(
                             left: MediaQuery.of(context).size.width / 120),
-                        height: 50,
-                        width: 50,
+                        height: 45,
+                        width: 45,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(50),
                             color: Colors.black54),
@@ -172,7 +177,7 @@ class _DetailScreenState extends State<DetailScreen> {
               ],
             ),
             Container(
-              margin: EdgeInsets.all(16),
+              margin: EdgeInsets.only(left: 16, right: 16, top: 16),
               child: Text(
                 widget.place.name,
                 textAlign: TextAlign.left,
@@ -183,7 +188,7 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              margin: EdgeInsets.only(left: 14, right: 16),
               child: Row(
                 children: [
                   RatingBarIndicator(
@@ -223,13 +228,35 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             Container(
+              margin: EdgeInsets.only(left: 14, right: 16, top: 5, bottom: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.grey[600],
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    widget.place.location,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            Container(
               margin: EdgeInsets.symmetric(vertical: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Column(
                     children: <Widget>[
-                      Icon(Icons.calendar_today),
+                      Icon(
+                        Icons.calendar_today,
+                        color: Colors.red[900],
+                      ),
                       SizedBox(height: 8.0),
                       Text(
                         widget.place.openDays,
@@ -239,7 +266,10 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                   Column(
                     children: <Widget>[
-                      Icon(Icons.access_time),
+                      Icon(
+                        Icons.access_time,
+                        color: Colors.orange[400],
+                      ),
                       SizedBox(height: 8.0),
                       Text(
                         widget.place.openTime,
@@ -249,7 +279,10 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                   Column(
                     children: <Widget>[
-                      Icon(Icons.monetization_on),
+                      Icon(
+                        Icons.monetization_on,
+                        color: Colors.green[600],
+                      ),
                       SizedBox(height: 8.0),
                       Text(
                         FormatHelper.formatCurrency(
@@ -272,11 +305,60 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             Container(
-              padding: EdgeInsets.only(left: 16, right: 16),
+              padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: Text(
                 widget.place.description,
                 textAlign: TextAlign.left,
-                style: informationTextStyle,
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ),
+            Container(
+              height: 200,
+              child: Stack(
+                children: [
+                  Card(
+                    margin: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: GoogleMap(
+                          mapType: MapType.normal,
+                          myLocationEnabled: false,
+                          scrollGesturesEnabled: false,
+
+                          // initialCameraPosition: CameraPosition(target:  _posisi == null ? LatLng(_latitude,_longitude) : _posisi, zoom: 15,),
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(double.parse(widget.place.latitude),
+                                double.parse(widget.place.longitude)),
+                            zoom: 15,
+                          ),
+                          markers: Set<Marker>.of(
+                            <Marker>[
+                              Marker(
+                                draggable: false,
+                                markerId: MarkerId("1"),
+                                position: LatLng(
+                                    double.parse(widget.place.latitude),
+                                    double.parse(widget.place.longitude)),
+                                icon: BitmapDescriptor.defaultMarker,
+                              )
+                            ],
+                          ),
+
+                          onMapCreated: (GoogleMapController controller) {
+                            _mapsController.complete(controller);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Container(

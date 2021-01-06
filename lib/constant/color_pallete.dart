@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ColorPalette {
-  static const themeColor = Color(0xFF369D9D);
+  static const themeColor = Color(0xFF0096DB);
   static const btnBlue = Color(0xFF0096DB);
   static const btnYellow = Color(0xFFFFC344);
   static const btnGreen = Color(0xFF34C23C);

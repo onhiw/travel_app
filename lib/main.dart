@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:submission_flutter/screen/home_screen.dart';
 import 'package:submission_flutter/screen/splash_screen.dart';
+import 'package:submission_flutter/screen/widgets/widget_home.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Poppins'),
-      home: HomeScreen(),
+      home: HomeWidget(),
     );
   }
 }
