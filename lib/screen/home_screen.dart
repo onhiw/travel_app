@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   Position _currentPosition;
   String _currentAddress;
-  String _currentAddressComplete;
+  String currentAddressComplete;
 
   String imageUrl =
       "https://lelogama.go-jek.com/cache/2f/07/2f0794cec0533467b1cfdbf209802f10.jpg,https://www.themulia.com/getmedia/779d0eb5-fd4f-498f-8575-599039237b72/Ladies-Courtyard.jpg/?width=1200&height=630&ext=.jpg&maxsidesize=600,https://www.ajnn.net/files/cache/20160116-gunung-perkison-gedoykocan-images-600x315.jpg";
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return geolocator.placemarkFromPosition(locationData);
     }).then((List<Placemark> addresses) {
       Placemark place = addresses[0];
-      _currentAddressComplete =
+      currentAddressComplete =
           "${place.thoroughfare} ${place.subThoroughfare}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea}, ${place.country}";
       _currentAddress = "${place.locality}";
     }).catchError((onError) {
@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           .then((List<Placemark> addresses) {
         Placemark place = addresses[0];
         setState(() {
-          _currentAddressComplete =
+          currentAddressComplete =
               "${place.thoroughfare} ${place.subThoroughfare}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea}, ${place.country}";
           _currentAddress = "${place.locality}";
         });
